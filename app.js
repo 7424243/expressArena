@@ -50,6 +50,13 @@ app.get('/greetings', (req, res) => {
     res.send(greeting)
 })
 
+app.get('/sum', (req, res) => {
+    const a = parseInt(req.query.a)
+    const b = parseInt(req.query.b)
+    const sum = a + b
+    res.send(`The sum of ${a} and ${b} is ${sum}`)
+})
+
 //listening on local host 8000
 app.listen(8000, () => {
     console.log('Express server is listening on port 8000!')
