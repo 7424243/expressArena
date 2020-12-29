@@ -1,3 +1,4 @@
+const { text } = require('express')
 const express = require('express')
 const morgan = require('morgan')
 
@@ -50,11 +51,43 @@ app.get('/greetings', (req, res) => {
     res.send(greeting)
 })
 
+//Checkpoint 3, Assignment #1:
 app.get('/sum', (req, res) => {
     const a = parseInt(req.query.a)
     const b = parseInt(req.query.b)
+    if(!b) {
+        return res.status(400).send('b is required and must be a number')
+    }
+    if(!a) {
+        return res.status(400).send('a is required and must be a number')
+    }
     const sum = a + b
-    res.send(`The sum of ${a} and ${b} is ${sum}`)
+    res.status(200).send(`The sum of ${a} and ${b} is ${sum}`)
+})
+
+//Checkpoint 3, Assignment #2:
+app.get('/cipher', (req, res) => {
+    const text = req.query.text
+    const shift = parseInt(req.query.shift)
+    if(!text) {
+        return res.status(400).send('text is required')
+    }
+    if(!shift) {
+        return res.status(400).send('shift is required and must be a number')
+    }
+    const base = 'A'.charCodeAt(0)
+    const cipher = text.toUpperCase().split('').map(char => {
+        const code = char.charCodeAt(0)
+        if(code < base || code > (base + 26)) {
+            return char
+        }
+        let difference = code - base
+        difference = difference + shift
+        diffierence = difference % 26
+        const shiftedCharacter = String.fromCharCode(base + difference)
+        return shiftedCharacter
+    }).join('')
+    res.status(200).send(cipher)
 })
 
 //listening on local host 8000
