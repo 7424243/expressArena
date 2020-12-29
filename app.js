@@ -55,10 +55,10 @@ app.get('/greetings', (req, res) => {
 app.get('/sum', (req, res) => {
     const a = parseInt(req.query.a)
     const b = parseInt(req.query.b)
-    if(!b) {
+    if(!b || Number.isNaN(b)) {
         return res.status(400).send('b is required and must be a number')
     }
-    if(!a) {
+    if(!a || Number.isNaN(a)) {
         return res.status(400).send('a is required and must be a number')
     }
     const sum = a + b
@@ -72,7 +72,7 @@ app.get('/cipher', (req, res) => {
     if(!text) {
         return res.status(400).send('text is required')
     }
-    if(!shift) {
+    if(!shift || Number.isNaN(shift)) {
         return res.status(400).send('shift is required and must be a number')
     }
     const base = 'A'.charCodeAt(0)
@@ -88,6 +88,48 @@ app.get('/cipher', (req, res) => {
         return shiftedCharacter
     }).join('')
     res.status(200).send(cipher)
+})
+
+app.get('/lotto', (req, res) => {
+    const numbers = req.query.arr
+    if(!numbers || !Array.isArray(numbers)) {
+        return res.status(400).send('numbers is required and must be an array')
+    }
+    const userGuesses = numbers.map(n => parseInt(n)).filter(n => !Number.isNaN(n) && (n >= 1 && n <= 20))
+    if(userGuesses.length != 6) {
+        return res.status(400).send('numbers must contain 6 integers between 1 and 20')
+    }
+    const stockNumbers = Array(20).fill(1).map((_, i) => i +1)
+    const winningNumbers = []
+    for (let i = 0; i < 6 ; i++) {
+        const randomNumber = Math.floor(Math.random() * stockNumbers.length)
+        winningNumbers.push(stockNumbers[randomNumber])
+        stockNumbers.splice(randomNumber, 1)
+    }
+    let difference = winningNumbers.filter(n => !userGuesses.includes(n))
+    let responseText
+
+    switch (difference.length) {
+        case 0:
+            responseText = 'Wow! Unbelieveable! You could have won the mega millions!'
+            break;
+        case 1:
+            responseText = 'Contratulations! You win $100!'
+            break;
+        case 2: 
+            responseText = 'Congratulations, you win a free ticket!'
+            break;
+        default:
+            responseText = 'Sorry, you lose'
+            break;
+    }
+    res.json({
+        userGuesses,
+        winningNumbers,
+        difference,
+        responseText
+    });
+    res.send(responseText)
 })
 
 //listening on local host 8000
